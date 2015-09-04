@@ -1,0 +1,38 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+If the triple-store is running, show how many triples it has and ask whether to
+continue (this is reminder to clear, if desired).
+
+Ingest into the specified graph name.
+
+Ingest all of the eligible files in the specified directory, and in any 
+sub-directories. A file is eligible if its name matches the regular expression.
+By default, this means files with extensions of .rdf, .owl, .nt, or .ttl. 
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_ingest_directory_tree <directory> <graph_uri> <timings_output_file> [regexp] [REPLACE]
+
+--------------------------------------------------------------------------------
+=end
+
+#require 'rubygems'
+$LOAD_PATH.unshift File.expand_path('/Users/jeb228/LD4L/projects/triple_store_drivers/lib')
+require 'triple_store_drivers'
+
+$LOAD_PATH.unshift File.expand_path('/Users/jeb228/LD4L/projects/triple_store_controller/lib')
+require 'triple_store_controller'
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_ingesting.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lIngesting::IngestDirectoryTree.new.run

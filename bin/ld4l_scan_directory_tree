@@ -1,0 +1,25 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Run rapper against all eligible files in a directory tree, compiling a list of
+the syntax errors in the files.
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_scan_directory_tree <directory> <error_file> [regexp] [REPLACE]
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_ingesting.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lIngesting::ScanDirectoryTree.new.run

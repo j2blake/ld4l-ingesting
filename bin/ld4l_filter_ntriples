@@ -1,0 +1,25 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Traverse the input directory and its subdirectories, copying all '.nt' files 
+into the output directory, filtering out all triples with known syntax errors. 
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_filter_ntriples <input_directory> <output_directory> [OVERWRITE] <report_file> [REPLACE]
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_ingesting.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lIngesting::FilterNtriples.new.run
