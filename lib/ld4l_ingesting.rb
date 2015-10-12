@@ -4,6 +4,7 @@ require 'find'
 require 'tempfile'
 
 require "ld4l_ingesting/version"
+require "ld4l_ingesting/convert_directory_tree"
 require "ld4l_ingesting/ingest_directory_tree"
 require "ld4l_ingesting/filter_ntriples"
 require "ld4l_ingesting/scan_directory_tree"
