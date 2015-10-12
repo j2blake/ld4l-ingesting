@@ -14,6 +14,8 @@ Usage: ld4l_filter_ntriples <input_directory> <output_directory> [OVERWRITE] <re
 module Ld4lIngesting
   class FilterNtriples
     USAGE_TEXT = 'Usage is ld4l_filter_ntriples <input_directory> <output_directory> [OVERWRITE] <report_file> [REPLACE]'
+    INVALID_URI_CHARACTERS = /[^\w\/?:;@&=+$,-.!~*()'%#\[\]]/
+    INVALID_PREFIX_CHARACTERS= /[^\w.-:]/
 
     def initialize
       @blank_lines_count = 0
@@ -95,18 +97,44 @@ module Ld4lIngesting
     end
 
     def good_subject(s)
-      s.index(':') && s =~ / ^ ( <\S+> | [^<>\s]+ ) $ /x
+      good_uri(s)
     end
 
     def good_predicate(p)
-      p.index(':') && p =~ / ^ ( <\S+> | [^<>\s]+ ) $ /x
+      good_uri(p)
     end
 
     def good_object(o)
-      return true if o.start_with?('"')
-      o.index(':') && o =~ / ^ ( <\S+> | [^<>\s]+ ) $ /x
+      good_uri(o) || good_literal(o)
     end
-
+    
+    def good_uri(uri)
+      good_explicit_uri(uri) || good_prefixed_uri(uri)
+    end
+    
+    def good_explicit(uri)
+      uri[0] == '<' && uri[-1] == '>' && uri.index(':') && ! uri =~ INVALID_URI_CHARACTERS
+    end
+    
+    def good_prefixed_uri(uri)
+      uri.index(':') && ! uri =~ INVALID_PREFIX_CHARACTERS
+    
+    def good_literal(literal)
+      good_untyped_literal(literal) || good_typed_literal(literal) || good_language_literal(literal)
+    end
+    
+    def good_untyped_literal(literal)
+      literal =~ /^"[^"]*"$/
+    end
+    
+    def good_typed_literal(literal)
+      literal =~ /^"[^"]*"\^\^[^" ]+$/
+    end
+    
+    def good_language_literal(literal)
+      literal =~ /^"[^"]*"@\S+$/
+    end
+    
     def report()
       puts "Processed #{@good_triples_count} good triples in #{@files_count} files."
       puts "Found #{@bad_triples_count} bad triples and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
