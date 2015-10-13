@@ -16,7 +16,6 @@ module Ld4lIngesting
     USAGE_TEXT = 'Usage is ld4l_filter_ntriples <input_directory> <output_directory> [OVERWRITE] <report_file> [REPLACE]'
     INVALID_URI_CHARACTERS = /[^\w\/?:;@&=+$,-.!~*()'%#\[\]]/
     INVALID_PREFIX_CHARACTERS= /[^\w.-:]/
-
     def initialize
       @blank_lines_count = 0
       @bad_triples_count = 0
@@ -84,16 +83,20 @@ module Ld4lIngesting
       if bad > 0 || blank > 0
         @bad_files_count += 1
         @bad_triples_count += bad
-      @blank_lines_count += blank
+        @blank_lines_count += blank
       end
 
       puts "Found #{good} good triples, #{bad} bad triples, and #{blank} blank lines in #{in_path}"
     end
 
     def good_syntax(line)
-      line =~ / ^ \s* (\S+) \s+ (\S+) \s+ (.*?) \s+ \. \s* $ /x
-      match = $~
+      match = parse_line(line)
       return match && good_subject(match[1]) && good_predicate(match[2]) && good_object(match[3])
+    end
+
+    def parse_line(line)
+      line =~ / ^ \s* (\S+) \s+ (\S+) \s+ (.*?) \s+ \. \s* $ /x
+      $~
     end
 
     def good_subject(s)
@@ -107,34 +110,41 @@ module Ld4lIngesting
     def good_object(o)
       good_uri(o) || good_literal(o)
     end
-    
+
     def good_uri(uri)
       good_explicit_uri(uri) || good_prefixed_uri(uri)
     end
-    
-    def good_explicit(uri)
-      uri[0] == '<' && uri[-1] == '>' && uri.index(':') && ! uri =~ INVALID_URI_CHARACTERS
+
+    def good_explicit_uri(uri)
+      return false unless uri[0] == '<'
+      return false unless uri[-1] == '>'
+      return false unless uri.index(':')
+      return false if uri[1..-2] =~ INVALID_URI_CHARACTERS
+      true
     end
-    
+
     def good_prefixed_uri(uri)
-      uri.index(':') && ! uri =~ INVALID_PREFIX_CHARACTERS
-    
+      return false unless uri.index(':')
+      return false if uri =~ INVALID_PREFIX_CHARACTERS
+      true
+    end
+
     def good_literal(literal)
       good_untyped_literal(literal) || good_typed_literal(literal) || good_language_literal(literal)
     end
-    
+
     def good_untyped_literal(literal)
       literal =~ /^"[^"]*"$/
     end
-    
+
     def good_typed_literal(literal)
       literal =~ /^"[^"]*"\^\^[^" ]+$/
     end
-    
+
     def good_language_literal(literal)
       literal =~ /^"[^"]*"@\S+$/
     end
-    
+
     def report()
       puts "Processed #{@good_triples_count} good triples in #{@files_count} files."
       puts "Found #{@bad_triples_count} bad triples and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
