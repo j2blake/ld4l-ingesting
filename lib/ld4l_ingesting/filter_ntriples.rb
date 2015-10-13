@@ -64,8 +64,10 @@ module Ld4lIngesting
       blank = 0
       bad = 0
       good = 0
+      line_number = 0
       File.open(out_path, 'w') do |out|
         File.foreach(in_path) do |line|
+          line_number += 1
           if line.strip.empty?
             blank += 1
           elsif good_syntax(line)
@@ -73,7 +75,7 @@ module Ld4lIngesting
             good += 1
           else
             bad += 1
-            @report.write("#{in_path}:  #{line}")
+            @report.write("#{in_path}[#{line_number}]:  #{line}")
           end
         end
       end
@@ -90,59 +92,23 @@ module Ld4lIngesting
     end
 
     def good_syntax(line)
-      match = parse_line(line)
-      return match && good_subject(match[1]) && good_predicate(match[2]) && good_object(match[3])
+      check_empty_uri(line) && parse_with_raptor(line)
     end
-
-    def parse_line(line)
-      line =~ / ^ \s* (\S+) \s+ (\S+) \s+ (.*?) \s+ \. \s* $ /x
-      $~
+    
+    def check_empty_uri(line)
+      ! line.index('<>')
     end
-
-    def good_subject(s)
-      good_uri(s)
-    end
-
-    def good_predicate(p)
-      good_uri(p)
-    end
-
-    def good_object(o)
-      good_uri(o) || good_literal(o)
-    end
-
-    def good_uri(uri)
-      good_explicit_uri(uri) || good_prefixed_uri(uri)
-    end
-
-    def good_explicit_uri(uri)
-      return false unless uri[0] == '<'
-      return false unless uri[-1] == '>'
-      return false unless uri.index(':')
-      return false if uri[1..-2] =~ INVALID_URI_CHARACTERS
-      true
-    end
-
-    def good_prefixed_uri(uri)
-      return false unless uri.index(':')
-      return false if uri =~ INVALID_PREFIX_CHARACTERS
-      true
-    end
-
-    def good_literal(literal)
-      good_untyped_literal(literal) || good_typed_literal(literal) || good_language_literal(literal)
-    end
-
-    def good_untyped_literal(literal)
-      literal =~ /^"[^"]*"$/
-    end
-
-    def good_typed_literal(literal)
-      literal =~ /^"[^"]*"\^\^[^" ]+$/
-    end
-
-    def good_language_literal(literal)
-      literal =~ /^"[^"]*"@\S+$/
+    
+    def parse_with_raptor(line)
+      begin
+        RDF::Reader.for(:ntriples).new(line) do |reader|
+          reader.each_statement do |statement|
+          end
+        end
+        true
+      rescue RDF::ReaderError => e
+        false
+      end
     end
 
     def report()

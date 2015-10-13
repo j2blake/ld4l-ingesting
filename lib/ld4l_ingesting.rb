@@ -1,6 +1,8 @@
 require 'benchmark'
 require 'fileutils'
 require 'find'
+require 'rdf'
+require 'rdf/ntriples'
 require 'tempfile'
 
 require "ld4l_ingesting/version"
