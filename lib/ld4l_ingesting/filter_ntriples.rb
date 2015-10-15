@@ -22,6 +22,7 @@ module Ld4lIngesting
       @good_triples_count = 0
       @bad_files_count = 0
       @files_count = 0
+      @error_count = 0
     end
 
     def process_arguments(args)
@@ -62,60 +63,46 @@ module Ld4lIngesting
 
     def filter_file(in_path, out_path)
       blank = 0
-      bad = 0
+      total = 0
       good = 0
-      line_number = 0
-      File.open(out_path, 'w') do |out|
-        File.foreach(in_path) do |line|
-          line_number += 1
-          if line.strip.empty?
-            blank += 1
-          elsif good_syntax(line)
-            out.write(line)
-            good += 1
-          else
-            bad += 1
-            @report.write("#{in_path}[#{line_number}]:  #{line}")
-          end
+      errors = 0
+
+      `rapper -i 'ntriples' #{in_path} - > #{out_path} 2> #{@tempfile_path}`
+
+      error_lines = File.readlines(@tempfile_path).each.select {|l| l.index('Error')}
+      unless error_lines.empty?
+        @bad_files_count += 1
+        @report.write(error_lines.join)
+        errors = error_lines.size
+      end
+
+      File.foreach(in_path) do |line|
+        total += 1
+        if line.strip.empty?
+          blank += 1
         end
       end
+
+      File.foreach(out_path) do |line|
+        good += 1
+      end
+
+      bad = total - blank - good
 
       @files_count += 1
       @good_triples_count += good
-      if bad > 0 || blank > 0
-        @bad_files_count += 1
-        @bad_triples_count += bad
-        @blank_lines_count += blank
-      end
+      @blank_lines_count += blank
+      @bad_triples_count += bad
+      @error_count += errors
 
-      puts "Found #{good} good triples, #{bad} bad triples, and #{blank} blank lines in #{in_path}"
-    end
-
-    def good_syntax(line)
-      check_empty_uri(line) && parse_with_raptor(line)
-    end
-    
-    def check_empty_uri(line)
-      ! line.index('<>')
-    end
-    
-    def parse_with_raptor(line)
-      begin
-        RDF::Reader.for(:ntriples).new(line) do |reader|
-          reader.each_statement do |statement|
-          end
-        end
-        true
-      rescue RDF::ReaderError => e
-        false
-      end
+      puts "Found #{good} good triples, #{bad} bad triples (#{errors} errors), and #{blank} blank lines in #{in_path}"
     end
 
     def report()
       puts "Processed #{@good_triples_count} good triples in #{@files_count} files."
-      puts "Found #{@bad_triples_count} bad triples and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
+      puts "Found #{@bad_triples_count} bad triples (#{@error_count} errors) and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
       @report.puts "Processed #{@good_triples_count} good triples in #{@files_count} files."
-      @report.puts "Found #{@bad_triples_count} bad triples and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
+      @report.puts "Found #{@bad_triples_count} bad triples (#{@error_count} errors) and #{@blank_lines_count} blank lines in #{@bad_files_count} files."
     end
 
     def run()
@@ -125,9 +112,14 @@ module Ld4lIngesting
         @report = File.open(@report_file_path, 'w')
         begin
           prepare_output_directory
+
+          tempfile = Tempfile.new('ld4l_scan')
+          @tempfile_path = tempfile.path
+
           traverse
           report
         ensure
+          tempfile.close! if tempfile
           @report.close if @report
         end
       rescue UserInputError
