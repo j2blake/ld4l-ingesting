@@ -1,0 +1,25 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Convert a directory tree full of huge NTriples file into a directory tree full 
+of lots of small NTriples files.
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_break_nt_files <input_directory> <output_directory> [OVERWRITE] <report_file> [REPLACE] <max_triples>
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_ingesting.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lIngesting::BreakNtFiles.new.run

@@ -6,6 +6,7 @@ require 'rdf/ntriples'
 require 'tempfile'
 
 require "ld4l_ingesting/version"
+require "ld4l_ingesting/break_nt_files"
 require "ld4l_ingesting/convert_directory_tree"
 require "ld4l_ingesting/ingest_directory_tree"
 require "ld4l_ingesting/filter_ntriples"
