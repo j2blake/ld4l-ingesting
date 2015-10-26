@@ -40,6 +40,8 @@ module Ld4lIngesting
       else
         @filename_matcher = DEFAULT_MATCHER
       end
+      
+      @start_time = Time.now
     end
 
     def complain_if_not_running
@@ -81,6 +83,11 @@ module Ld4lIngesting
         f.puts("%s, %.3f" % [path, elapsed])
       end
     end
+    
+    def report
+      puts "Start time: #{@start_time}"
+      puts "End time:   #{Time.now}"
+    end
 
     def run
       begin
@@ -89,6 +96,7 @@ module Ld4lIngesting
 
         if confirm_intentions
           traverse_the_directory
+          report
         else
           puts
           puts "OK. Skip it."
