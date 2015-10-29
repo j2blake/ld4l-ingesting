@@ -7,6 +7,8 @@ require 'find'
 require 'rdf'
 require 'rdf/ntriples'
 require 'tempfile'
+require 'triple_store_drivers'
+require 'triple_store_controller'
 require "ld4l_ingesting/version"
 require "ld4l_ingesting/break_nt_files"
 require "ld4l_ingesting/convert_directory_tree"
