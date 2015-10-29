@@ -64,7 +64,6 @@ module Ld4lIngesting
       basename = File.basename(@output_path)
       filename, period, extension = basename.rpartition('.')
       expanded_basename = "%s_%03d.%s" % [filename, @output_file_counter, extension]
-#      expanded_basename = filename + '_' + ("%03d" % [@output_file_counter]) + '.' + extension
       File.expand_path(expanded_basename, dirname)
     end
   end
