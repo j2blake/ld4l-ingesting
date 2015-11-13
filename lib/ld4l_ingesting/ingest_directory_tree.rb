@@ -12,14 +12,14 @@ By default, this means files with extensions of .rdf, .owl, .nt, or .ttl.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_ingest_directory_tree <directory> <graph_uri> <timings_output_file> [regexp] [REPLACE]
+Usage: ld4l_ingest_directory_tree <directory> <graph_uri> <report_file> [regexp] [REPLACE]
 
 --------------------------------------------------------------------------------
 =end
 
 module Ld4lIngesting
   class IngestDirectoryTree
-    USAGE_TEXT = 'Usage is ld4l_ingest_directory_tree <directory> <graph_uri> <timings_output_file> [regexp] [REPLACE]'
+    USAGE_TEXT = 'Usage is ld4l_ingest_directory_tree <directory> <graph_uri> <report_file> [regexp] [REPLACE]'
     DEFAULT_MATCHER = /.+\.(rdf|owl|nt|ttl)$/
     def process_arguments(args)
       replace_output = args.delete('REPLACE')
@@ -33,14 +33,15 @@ module Ld4lIngesting
 
       raise UserInputError.new("#{args[2]} already exists -- specify REPLACE") if File.exist?(args[2]) unless replace_output
       raise UserInputError.new("Can't create #{args[2]}: no parent directory.") unless Dir.exist?(File.dirname(args[2]))
-      @timings_output = File.expand_path(args[2])
+      @report_file = File.expand_path(args[2])
+      File.delete(@report_file) if File.exist?(@report_file)
 
       if args[3]
         @filename_matcher = Regexp.new(args[3])
       else
         @filename_matcher = DEFAULT_MATCHER
       end
-      
+
       @start_time = Time.now
     end
 
@@ -79,11 +80,11 @@ module Ld4lIngesting
     end
 
     def record_ingest(path, elapsed)
-      File.open(@timings_output, 'a') do |f|
+      File.open(@report_file, 'a') do |f|
         f.puts("%s, %.3f" % [path, elapsed])
       end
     end
-    
+
     def report
       puts "Start time: #{@start_time}"
       puts "End time:   #{Time.now}"

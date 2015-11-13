@@ -14,7 +14,7 @@ By default, this means files with extensions of .rdf, .owl, .nt, or .ttl.
 
 --------------------------------------------------------------------------------
 
-Usage: ld4l_ingest_directory_tree <directory> <graph_uri> <timings_output_file> [regexp] [REPLACE]
+Usage: ld4l_ingest_directory_tree <directory> <graph_uri> <report_file> [regexp] [REPLACE]
 
 --------------------------------------------------------------------------------
 =end
