@@ -1,0 +1,32 @@
+#! /usr/bin/env ruby
+
+=begin rdoc
+--------------------------------------------------------------------------------
+
+Summarize the ingest times. For each 100 files (or 500 or 1000), figure the
+average ingest time.
+
+Output as a CSV file, like this:
+	"/the/full/ingest_timings_file/path", 100
+    "Files", "Average time"
+	"1-100", 14.2
+	"101-200", 15.3
+	...
+
+--------------------------------------------------------------------------------
+
+Usage: ld4l_summarize_ingest_timings <timings_file> <group_size> <report_file> [REPLACE]
+
+--------------------------------------------------------------------------------
+=end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'ld4l_ingesting.rb'
+
+#
+# ---------------------------------------------------------
+# MAIN ROUTINE
+# ---------------------------------------------------------
+#
+
+Ld4lIngesting::SummarizeIngestTimings.new.run

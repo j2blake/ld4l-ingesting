@@ -15,6 +15,7 @@ require "ld4l_ingesting/convert_directory_tree"
 require "ld4l_ingesting/ingest_directory_tree"
 require "ld4l_ingesting/filter_ntriples"
 require "ld4l_ingesting/scan_directory_tree"
+require "ld4l_ingesting/summarize_ingest_timings"
 
 module Kernel
   def bogus(message)
