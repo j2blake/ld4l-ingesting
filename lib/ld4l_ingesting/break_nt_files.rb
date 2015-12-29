@@ -42,7 +42,8 @@ module Ld4lIngesting
     def initialize
     end
 
-    def process_arguments(args)
+    def process_arguments()
+      args = Array.new(ARGV)
       replace_file = args.delete('REPLACE')
       overwrite_directory = args.delete('OVERWRITE')
 
@@ -107,8 +108,8 @@ module Ld4lIngesting
       FileBreaker.new(@input_path, @output_path, breakpoints).break
     end
     
-    def log_header(args)
-      logit "ld4l_break_nt_files #{args.join(' ')}"
+    def log_header()
+      logit "ld4l_break_nt_files #{ARGV.join(' ')}"
     end
     
     def logit(message)
@@ -123,9 +124,9 @@ module Ld4lIngesting
 
     def run()
       begin
-        process_arguments(ARGV)
+        process_arguments
         @report = File.open(@report_file_path, 'w')
-        log_header(ARGV)
+        log_header()
         
         begin
           prepare_output_directory
